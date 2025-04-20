@@ -16,6 +16,6 @@ Installation and Requirements :
 - Build the file in any IDE / Code Editior or in Terminal.
 - No installation needed if using PyCalc-CE.exe on Windows Systems or PyCalc-CE for Linux Systems!
 
-
+![image](https://github.com/user-attachments/assets/b372982d-1035-4079-8e4b-94c88380029d)
 
 Simple! Powerful! Lightweight!
