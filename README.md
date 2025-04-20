@@ -1,5 +1,7 @@
 PyCalc-CE : A Simple and Lightweight Calculator. Now in C++!
 
+CE - C++ Edition
+
 Features Include :
 
 - Dozens of Calculation Options ✅
