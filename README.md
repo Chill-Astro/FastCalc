@@ -6,7 +6,6 @@ Features Include :
 
 - Dozens of Calculation Options ✅
 - Extemely Lightweight [It's a Terminal-based App]. ✅
-- Update Checking Support. ✅
 - Highly Powerful and extendible. ✅
 - Fast and Error-Proof Calculations. ✅
 - High Precision for decimals. ✅
