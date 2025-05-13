@@ -1,519 +1,594 @@
 #include <iostream>
-#include <cmath> // For mathematical functions like sqrt, pow, cbrt
 #include <string>
-#include <limits> // Required for numeric_limits
-#include <cctype> // Required for tolower
-#include <algorithm> // Required for transform
+#include <vector>
+#include <cmath>
+#include <limits> // Required for std::numeric_limits
+#include <stdexcept> // Required for std::stof/stoi exceptions
+#include <curl/curl.h> // Required for libcurl
+#include <algorithm>
+#include <numbers> // Required for std::numbers::pi_v
 
+// --- Constants ---
+const std::string UPDATE_VERSION_URL = "https://gist.githubusercontent.com/Chill-Astro/3188d1da41a7d9de6225d01febafe32e/raw/1074e2f9489ea7d3603b14c59a7ea1fe1bc7afa1/PyCCPP_V.txt";
+const std::string CURRENT_VERSION = "1.1"; // Linux Release + Installer & Winget Support
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-using namespace std;
-const double PI = M_PI;
-const string CURRENT_VERSION = "1.0";
 
-// Helper function to get double input with basic error handling
-double getDoubleInput(const string& prompt) {
-    string input_str;
-    double value;
-    while (true) {
-        cout << prompt;
-        getline(cin, input_str);
-        try {
-            // Attempt to convert the string to a double
-            size_t processed_chars; // To check if entire string was consumed
-            value = stod(input_str, &processed_chars);
-
-            // Check if there were unexpected characters after the number
-            if (processed_chars != input_str.length()) {
-                 throw invalid_argument("Non-numeric characters present.");
-            }
-
-            return value; // Return the valid double value
-        } catch (const invalid_argument& e) {
-            cout << "Invalid input. Please enter a valid number." << endl;
-        } catch (const out_of_range& e) {
-            cout << "Input value out of range for a number." << endl;
-        }
-        cout << endl; // Add newline after error message as in original
-    }
+// --- libcurl Write Callback Function ---
+// This function gets called by libcurl as data arrives
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+    ((std::string*)userp)->append((char*)contents, size * nmemb);
+    return size * nmemb;
 }
-int getIntInput(const string& prompt) {
-    string input_str;
-    int value;
-    while (true) {
-        cout << prompt;
-        getline(cin, input_str);
-        try {
-            // Attempt to convert the string to an integer
-            size_t processed_chars;
-            value = stoi(input_str, &processed_chars);
 
-             // Check if there were unexpected characters after the number
-            if (processed_chars != input_str.length()) {
-                 throw invalid_argument("Non-integer characters present.");
-            }
+// --- Function to check for updates using libcurl ---
+void check_for_updates() {
+    CURL* curl;
+    CURLcode res;
+    std::string readBuffer;
 
-            return value; // Return the valid integer value
-        } catch (const invalid_argument& e) {
-            cout << "Invalid input. Please enter a whole number." << endl;
-        } catch (const out_of_range& e) {
-            cout << "Input value out of range for an integer." << endl;
-        }
-        cout << endl; // Add newline after error message as in original
-    }
-}
-int main() {
-    cout << "PyCalc-CE : A Simple and Lightweight Calculator. Now in C++!" << endl;
-    cout << "Version : " << CURRENT_VERSION << "\n\n";
+    // Global libcurl initialization (should ideally be done once)
+    // For this simple script, doing it here is okay, but be mindful
+    // in larger applications.
+    curl_global_init(CURL_GLOBAL_DEFAULT);
 
-    // Removed the check_for_updates function call
+    curl = curl_easy_init();
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, UPDATE_VERSION_URL.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // Timeout after 5 seconds
 
-    cout << "Select a Mathematical Operation : " << endl;
-    cout << "1. Addition\n"
-         << "2. Subtraction\n"
-         << "3. Multiplication\n"
-         << "4. Division\n"
-         << "5. Exponents (x^y)\n"
-         << "6. Square Root\n"
-         << "7. Cube Root\n"
-         << "8. Approximate / Rounding\n"
-         << "9. Heron's Formula\n"
-         << "10. Simple Interest\n"
-         << "11. Compound Interest\n"
-         << "12. Prime No. Check\n"
-         << "13. Triangle Check\n"
-         << "14. Right Triangle Check\n"
-         << "15. Perimiter [Various Shapes]\n"
-         << "16. Area [Varoius Shapes]\n"
-         << "17. Volume [Various Shapes]\n"
-         << "18. Surface Area [Various Shapes]\n"
-         << "19. Curved Surface Area [Various Shapes]\n"
-         << "20. Diagonal Calculation [Various Shapes]\n"
-         << "21. Factorial Calculator\n"
-         << "22. Exit PyCalc-CE\n";
+        res = curl_easy_perform(curl);
 
-    while (true) {
-        string ch;
-        cout << endl;
-        cout << "Enter choice [ 1 - 22 ] : ";
-        getline(cin, ch);
-        cout << endl; 
-        // Use if-else if-else for string comparison as C++ switch doesn't work on strings
-        if (ch == "1") { // Addition
-            double x = getDoubleInput("Enter first number : "); cout << endl;
-            double y = getDoubleInput("Enter second number : "); cout << endl;
-            cout << x << " + " << y << " = " << (x + y) << "\n\n";
-        } else if (ch == "2") { // Subtraction
-            double x = getDoubleInput("Enter first number : "); cout << endl;
-            double y = getDoubleInput("Enter second number : "); cout << endl;
-            cout << x << " - " << y << " = " << (x - y) << "\n\n";
-        } else if (ch == "3") { // Multiplication
-            double x = getDoubleInput("Enter first number : "); cout << endl;
-            double y = getDoubleInput("Enter second number : "); cout << endl;
-            cout << x << " * " << y << " = " << (x * y) << "\n\n";
-        } else if (ch == "4") { // Division
-             double x = getDoubleInput("Enter first number : "); cout << endl;
-             double y = getDoubleInput("Enter second number : "); cout << endl;
-             if (y == 0) {
-                 cout << "Div. by Zero Not Defined!\n\n";
-             } else {
-                 cout << x << " / " << y << " = " << (x / y) << "\n\n";
-             }
-        } else if (ch == "5") { // Exponents
-            double x = getDoubleInput("Enter base number (x) : "); cout << endl;
-            double y = getDoubleInput("Enter exponent number (y) : "); cout << endl;
-            cout << x << " ^ " << y << " = " << pow(x, y) << "\n\n";
-        } else if (ch == "6") { // Square Root
-            double x = getDoubleInput("Enter a number : "); cout << endl;
-            if (x < 0) {
-                // Standard sqrt returns NaN for negative, add a check for user clarity
-                cout << "Square root of a negative number is not a real number.\n\n";
+        if (res != CURLE_OK) {
+            std::cerr << "--- UPDATE CHECK FAILED! ---\n"
+                      << "⚠️ Could not check for updates. Please check your internet connection.\n"
+                      << "Error: " << curl_easy_strerror(res) << "\n"
+                      << "------------------------\n";
+        } else {
+            long http_code = 0;
+            curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &http_code);
+
+            if (http_code == 200) {
+                // Trim whitespace from the fetched version
+                size_t first = readBuffer.find_first_not_of(" \t\n\r");
+                if (std::string::npos == first) {
+                    readBuffer.clear(); // Buffer contains only whitespace
+                } else {
+                    size_t last = readBuffer.find_last_not_of(" \t\n\r");
+                    readBuffer = readBuffer.substr(first, (last - first + 1));
+                }
+
+                std::string latest_version = readBuffer;
+
+                // Version comparison (lexicographical string comparison as in Python)
+                if (latest_version > CURRENT_VERSION) {
+                    std::cout << "--- UPDATE AVAILABLE! ---\n"
+                              << "🎉 A NEW version of PyCalc-CE is Available! : " << latest_version << "\n"
+                              << "Currently using : " << CURRENT_VERSION << "\n"
+                              << "Please visit github.com/Chill-Astro/PyCalc-CE to download the latest release!\n" // Provide URL for Updates
+                              << "-----------------------\n";
+                } else if (latest_version == CURRENT_VERSION) {
+                    std::cout << "🎉 PyCalc is up to date!\n\n";
+                } else {
+                    std::cout << "⚠️ This is a DEV. Build of PyCalc!\n\n"; // For development scenarios
+                }
             } else {
-                cout << "Root " << x << " = " << sqrt(x) << "\n\n";
+                 std::cerr << "--- UPDATE CHECK FAILED! ---\n"
+                           << "⚠️ Could not check for updates. Received HTTP status code: " << http_code << "\n"
+                           << "------------------------\n";
+            }
+        }
+
+        // Clean up curl session
+        curl_easy_cleanup(curl);
+    } else {
+        std::cerr << "--- UPDATE CHECK FAILED! ---\n"
+                  << "⚠️ Could not initialize libcurl.\n"
+                  << "------------------------\n";
+    }
+
+    // Global libcurl cleanup (should ideally be done once at program exit)
+    curl_global_cleanup();
+}
+
+// --- Helper function to safely get float input ---
+bool get_float_input(const std::string& prompt, float& value) {
+    std::cout << prompt;
+    std::cin >> value;
+    if (std::cin.fail()) {
+        std::cout << "Invalid input. Please enter a number.\n\n";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    std::cout << '\n';
+    return true;
+}
+
+// --- Helper function to safely get int input ---
+bool get_int_input(const std::string& prompt, int& value) {
+    std::cout << prompt;
+    std::cin >> value;
+    if (std::cin.fail()) {
+        std::cout << "Invalid input. Please enter an integer.\n\n";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    std::cout << '\n';
+    return true;
+}
+
+
+// --- Perform Binary Operation ---
+// Simplified from Python version to handle specific operators
+void perform_binary_operation(char op) {
+    float x, y;
+    if (!get_float_input("Enter first number : ", x)) return;
+    if (!get_float_input("Enter second number : ", y)) return;
+
+    switch (op) {
+        case '+':
+            std::cout << x << " + " << y << " = " << x + y << "\n\n";
+            break;
+        case '-':
+            std::cout << x << " - " << y << " = " << x - y << "\n\n";
+            break;
+        case '*':
+            std::cout << x << " * " << y << " = " << x * y << "\n\n";
+            break;
+        case '^':
+            std::cout << x << " ^ " << y << " = " << std::pow(x, y) << "\n\n";
+            break;
+        // Division is handled separately in main due to zero check
+        default:
+            std::cout << "Unknown operator in perform_binary_operation.\n\n";
+            break;
+    }
+}
+
+// --- Main Function ---
+int main() {
+    std::cout << "PyCalc-CE : A Simple and Lightweight Calculator. Made in C++!\n"
+              << "Version : " << CURRENT_VERSION << "\n\n"; // Print Version
+
+    check_for_updates(); // Perform update check at startup
+
+    while (true) {
+        std::cout << "Select a Mathematical Operation : \n"
+                  << "\n1. Addition\n" << "2. Subtraction\n" << "3. Multiplication\n" << "4. Division\n"
+                  << "5. Exponents (x^y)\n" << "6. Square Root\n" << "7. Cube Root\n"
+                  << "8. Approximate / Rounding\n" << "9. Heron's Formula\n" << "10. Simple Interest\n"
+                  << "11. Compound Interest\n" << "12. Prime No. Check\n" << "13. Triangle Check\n"
+                  << "14. Right Triangle Check\n" << "15. Perimeter [Various Shapes]\n" << "16. Area [Various Shapes]\n"
+                  << "17. Volume [Various Shapes]\n" << "18. Surface Area [Various Shapes]\n"
+                  << "19. Curved Surface Area [Various Shapes]\n" << "20. Diagonal Calculation [Various Shapes]\n"
+                  << "21. Factorial Calculator\n" << "22. Exit PyCalc-CE\n\n";
+
+        std::string ch;
+        std::cout << "Enter choice [ 1 - 22 ] : ";
+        std::cin >> ch;
+        std::cout << '\n';
+
+        if (ch == "1") { // Addition
+            perform_binary_operation('+');
+        } else if (ch == "2") { // Subtraction
+            perform_binary_operation('-');
+        } else if (ch == "3") { // Multiplication
+            perform_binary_operation('*');
+        } else if (ch == "4") { // Division
+            float x, y;
+            if (!get_float_input("Enter first number : ", x)) continue;
+            if (!get_float_input("Enter second number : ", y)) continue;
+
+            if (y == 0) {
+                std::cout << "Div. by Zero Not Defined!\n\n";
+            } else {
+                std::cout << x << " / " << y << " = " << x / y << "\n\n";
+            }
+        } else if (ch == "5") { // Exponents
+            perform_binary_operation('^');
+        } else if (ch == "6") { // Square Root
+            float x;
+            if (!get_float_input("Enter a number : ", x)) continue;
+            if (x < 0) {
+                 std::cout << "Cannot calculate square root of a negative number.\n\n";
+            } else {
+                std::cout << "Root " << x << " = " << std::sqrt(x) << "\n\n";
             }
         } else if (ch == "7") { // Cube Root
-            double x = getDoubleInput("Enter a number : "); cout << endl;
-            cout << "C. Root " << x << " = " << cbrt(x) << "\n\n";
+            float x;
+            if (!get_float_input("Enter a number : ", x)) continue;
+            std::cout << "C. Root " << x << " = " << std::cbrt(x) << "\n\n";
         } else if (ch == "8") { // Rounding
-            double x = getDoubleInput("Enter a number : "); cout << endl;
-            cout << round(x) << "\n\n"; // std::round rounds to nearest integer
+            float x;
+            if (!get_float_input("Enter a number : ", x)) continue;
+            std::cout << std::round(x) << "\n\n";
         } else if (ch == "9") { // Heron's Formula
-            cout << "NOTE: Some Calculations may print NaN or result in errors depending on the values!\n";
-            double a = getDoubleInput("Enter the first side [a] : "); cout << endl;
-            double b = getDoubleInput("Enter the second side [b] : "); cout << endl;
-            double c = getDoubleInput("Enter third side [c] : "); cout << endl;
-            if (a <= 0 || b <= 0 || c <= 0) { // Check for positive sides
-                cout << "Sides must be positive.\n\n";
-            } else if ((a + b <= c) || (a + c <= b) || (b + c <= a)) { // Check triangle inequality
-                 cout << "These side lengths do not form a valid triangle.\n\n";
-            }
-            else {
-                double s = (a + b + c);
-                cout << "Perimeter : " << s << endl;
-                s /= 2;
-                cout << "s = " << s << endl;
-                // Calculate the term inside the square root
-                double radicand = s * (s - a) * (s - b) * (s - c);
+            std::cout << "NOTE: Some Calculations may print 0.0 depending on the values!\n\n";
+            float a, b, c;
+            if (!get_float_input("Enter the first side [a] : ", a)) continue;
+            if (!get_float_input("Enter the second side [b] : ", b)) continue;
+            if (!get_float_input("Enter third side [c] : ", c)) continue;
 
-                // Due to floating point inaccuracies, radicand might be slightly negative for a valid triangle
-                if (radicand < 0 && radicand > -1e-9) { // Check if it's very close to zero
-                     radicand = 0; // Treat it as zero
-                }
-
-                if (radicand < 0) { // Still negative means invalid input that passed basic checks
-                     cout << "Area : Calculation Error (invalid triangle or floating point issue)\n\n";
-                } else {
-                     double ar = sqrt(radicand);
-                     cout << "Area : " << ar << "\n\n";
-                }
+            if (a <= 0 || b <= 0 || c <= 0) {
+                std::cout << "Sides must be +ve.\n\n";
+                continue;
             }
+             // Check if it forms a valid triangle first (a + b > c, etc.)
+            if (!((a + b > c) && (a + c > b) && (b + c > a))) {
+                 std::cout << "Sides do not form a valid triangle. Area calculation is not possible.\n\n";
+                 continue;
+            }
+
+            float s = a + b + c;
+            std::cout << "Perimeter : " << s << '\n';
+            s /= 2;
+            std::cout << "s = " << s << '\n';
+            float ar = std::sqrt(s * (s - a) * (s - b) * (s - c));
+            std::cout << "Area : " << ar << "\n\n";
         } else if (ch == "10") { // Simple Interest
-             double p = getDoubleInput("Enter the Principal : "); cout << endl;
-             double r = getDoubleInput("Enter the Rate [ % ] : "); cout << endl;
-             double t = getDoubleInput("Enter the Time [ Years ] : "); cout << endl;
-             if (p < 0 || r < 0 || t < 0) {
-                 cout << "Principal, Rate, and Time must be non-negative.\n\n";
-             } else {
-                double si = p * r * t / 100.0;
-                cout << "Simple Interest : " << si << "\n";
-                cout << "Amount : " << (si + p) << "\n\n";
-             }
+            float p, r, t;
+            if (!get_float_input("Enter the Principal : ", p)) continue;
+            if (!get_float_input("Enter the Rate [ % ] : ", r)) continue;
+            if (!get_float_input("Enter the Time [ Years ] : ", t)) continue;
+
+            float si = p * r * t / 100;
+            std::cout << "Simple Interest : " << si << "\nAmount : " << (si + p) << "\n\n";
         } else if (ch == "11") { // Compound Interest
-             cout << "Compound Interest Calculation\n\n";
-             double p = getDoubleInput("Enter the Principal : "); cout << endl;
-             double r = getDoubleInput("Enter the Rate [ % ] : "); cout << endl;
-             double n = getDoubleInput("Enter the number of times interest is compounded per year : "); cout << endl;
-             double t = getDoubleInput("Enter the Time [ Years ] : "); cout << endl;
+            std::cout << "Compound Interest Calculation\n\n";
+            float p, r, n, t;
+            if (!get_float_input("Enter the Principal : ", p)) continue;
+            if (!get_float_input("Enter the Rate [ % ] : ", r)) continue;
+            if (!get_float_input("Enter the number of times interest is compounded per year : ", n)) continue;
+            if (!get_float_input("Enter the Time [ Years ] : ", t)) continue;
 
-             if (p < 0 || r < 0 || n <= 0 || t < 0) {
-                  cout << "Principal, Rate, and Time must be non-negative. Compounding frequency (n) must be positive.\n\n";
-             } else {
-                 // Calculate amount A = P(1 + R/(100*n))^(n*t)
-                 double rate_per_period = r / (100.0 * n);
-                 double num_periods = n * t;
-                 double amount = p * pow(1.0 + rate_per_period, num_periods);
-                 double ci = amount - p;
-                 cout << "Compound Interest : " << ci << "\n";
-                 cout << "Amount : " << amount << "\n\n";
+            // Ensure n and t are reasonable for pow
+             if (n <= 0 || t <= 0) {
+                 std::cout << "Number of times compounded per year and Time must be positive.\n\n";
+                 continue;
              }
+
+
+            float a = p * std::pow((1 + r / (100 * n)), n * t);
+            float ci = a - p;
+            std::cout << "Compound Interest : " << ci << "\nAmount : " << a << "\n\n";
         } else if (ch == "12") { // Prime Number Check
-             int x = getIntInput("Enter a Number : "); cout << endl;
-             bool is_prime = true;
-             if (x <= 1) {
-                 is_prime = false; // Numbers <= 1 are not prime
-             } else {
-                 // Check for factors from 2 up to the square root of x
-                 // This is an optimization; original code checked up to x-1
-                 for (int i = 2; i * i <= x; ++i) {
-                     if ((x % i) == 0) {
-                         is_prime = false;
-                         break; // Found a factor, not prime
-                     }
-                 }
-             }
-             if (is_prime) {
-                 cout << x << " is a Prime Number\n\n";
-             } else {
-                 cout << x << " is not a Prime Number\n\n";
-             }
+            int x;
+            if (!get_int_input("Enter a Number : ", x)) continue;
+
+            if (x > 1) {
+                bool is_prime = true;
+                for (int i = 2; i * i <= x; ++i) { // Optimization: check up to sqrt(x)
+                    if ((x % i) == 0) {
+                        is_prime = false;
+                        break;
+                    }
+                }
+                if (is_prime) {
+                    std::cout << x << " is a Prime Number\n\n";
+                } else {
+                    std::cout << x << " is not a Prime Number\n\n";
+                }
+            } else {
+                std::cout << x << " is not a Prime Number\n\n";
+            }
         } else if (ch == "13") { // Triangle Check
-             double a = getDoubleInput("Enter first side [a] : "); cout << endl;
-             double b = getDoubleInput("Enter second side [b] : "); cout << endl;
-             double c = getDoubleInput("Enter third side [c] : "); cout << endl;
-             if (a <= 0 || b <= 0 || c <= 0) { // Check for positive sides
-                 cout << "Sides must be positive\n\n";
-             } else if ((a + b > c) && (a + c > b) && (b + c > a)) { // Triangle inequality theorem
-                 cout << "Valid Triangle\n\n";
-             } else {
-                 cout << "Not a Valid Triangle\n\n";
-             }
+            float a, b, c;
+            if (!get_float_input("Enter first side [a] : ", a)) continue;
+            if (!get_float_input("Enter second side [b] : ", b)) continue;
+            if (!get_float_input("Enter third side [c] : ", c)) continue;
+
+            if (a <= 0 || b <= 0 || c <= 0) {
+                std::cout << "Sides must be +ve\n\n";
+                continue;
+            } else if ((a + b > c) && (a + c > b) && (b + c > a)) {
+                std::cout << "Valid Triangle\n\n";
+            } else {
+                std::cout << "Not a Valid Triangle\n\n";
+            }
         } else if (ch == "14") { // Right Triangle Check
-             double a = getDoubleInput("Enter first side [a] : "); cout << endl;
-             double b = getDoubleInput("Enter second side [b] : "); cout << endl;
-             double c = getDoubleInput("Enter third side [c] : "); cout << endl;
-             if (a <= 0 || b <= 0 || c <= 0) { // Check for positive sides
-                 cout << "Sides must be positive\n\n";
-             } else {
-                 // Using a small tolerance for floating point comparisons with pow()
-                 double tol = 1e-9; // Tolerance
-                 bool is_right = false;
-                 // Check Pythagorean theorem a^2 + b^2 = c^2 (and permutations)
-                 if (abs(pow(a, 2) + pow(b, 2) - pow(c, 2)) < tol) is_right = true;
-                 if (abs(pow(a, 2) + pow(c, 2) - pow(b, 2)) < tol) is_right = true;
-                 if (abs(pow(b, 2) + pow(c, 2) - pow(a, 2)) < tol) is_right = true;
+             float a, b, c;
+            if (!get_float_input("Enter first side [a] : ", a)) continue;
+            if (!get_float_input("Enter second side [b] : ", b)) continue;
+            if (!get_float_input("Enter third side [c] : ", c)) continue;
 
-                 if (is_right) {
-                     cout << "Is a Right Triangle\n\n";
-                 } else {
-                     cout << "Not a Right Triangle.\n\n";
-                 }
-             }
+            if (a <= 0 || b <= 0 || c <= 0) {
+                std::cout << "Sides must be +ve\n\n";
+                continue;
+            }
+
+            // Sort sides to easily check a^2 + b^2 = c^2 where c is the longest side
+            std::vector<float> sides = {a, b, c};
+            std::sort(sides.begin(), sides.end());
+
+            // Using a small epsilon for floating point comparison
+            float epsilon = 1e-9; // A small tolerance
+
+            if (std::fabs(std::pow(sides[0], 2) + std::pow(sides[1], 2) - std::pow(sides[2], 2)) < epsilon) {
+                std::cout << "Is a Right Triangle\n\n";
+            } else {
+                std::cout << "Not a Right Triangle.\n\n";
+            }
         } else if (ch == "15") { // Perimeter [Various Shapes]
-             cout << "Perimeter Calculation [Various Shapes]\n\n";
-             cout << "Select a shape : \n"
-                   << "1. Equilateral Triangle\n"
-                   << "2. Isosceles Triangle\n"
-                   << "3. Square / Rhombus\n"
-                   << "4. Rectangle / Parallelogram\n"
-                   << "5. Circle\n";
-             string sch;
-             cout << "Enter shape choice [ 1 - 5 ]: ";
-             getline(cin, sch);
-             cout << endl; // Python print() after input
+            std::cout << "Perimeter Calculation [Various Shapes]\n"
+                      << "Select a shape : \n" << "1. Equilateral Triangle\n" << "2. Isosceles Triangle\n"
+                      << "3. Square / Rhombus\n" << "4. Rectangle / Parallelogram\n" << "5. Circle\n\n";
 
-             if (sch == "1") { // Equilateral Triangle
-                 double a = getDoubleInput("Enter Side Length [a] : "); cout << endl;
-                 if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { cout << "Perimeter : " << 3 * a << "\n\n"; }
-             } else if (sch == "2") { // Isosceles Triangle
-                 double a = getDoubleInput("Enter Equal Side's Length : "); cout << endl;
-                 double b = getDoubleInput("Enter Non-Equal Side's Length : "); cout << endl;
-                  if (a < 0 || b < 0) { cout << "Side lengths cannot be negative.\n\n"; } else { cout << "Perimeter : " << 2 * a + b << "\n\n"; }
-             } else if (sch == "3") { // Square / Rhombus
-                 double a = getDoubleInput("Enter Length of Side [a] : "); cout << endl;
-                 if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { cout << "Perimeter : " << 4 * a << "\n\n"; }
-             } else if (sch == "4") { // Rectangle / Parallelogram
-                 double l = getDoubleInput("Enter Length [l] : "); cout << endl;
-                 double b = getDoubleInput("Enter Breadth [b] : "); cout << endl;
-                  if (l < 0 || b < 0) { cout << "Length and Breadth cannot be negative.\n\n"; } else { cout << "Perimeter : " << 2 * (l + b) << "\n\n"; }
-             } else if (sch == "5") { // circle
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                  if (r < 0) { cout << "Radius cannot be negative.\n\n"; } else { double c = 2 * PI * r; cout << "Circumference : " << c << "\n\n"; }
-             } else {
-                 cout << "Invalid Option! Exiting Perimeter Calculation ...\n\n";
-             }
+            std::string sch;
+            std::cout << "Enter shape choice [ 1 - 5 ]: ";
+            std::cin >> sch;
+            std::cout << '\n';
+
+            if (sch == "1") { // Equilateral Triangle
+                float a;
+                if (!get_float_input("Enter Side Length [a] : ", a)) continue;
+                std::cout << "Perimeter : " << 3 * a << "\n\n";
+            } else if (sch == "2") { // Isosceles Triangle
+                 float a, b;
+                if (!get_float_input("Enter Equal Side's Length : ", a)) continue;
+                if (!get_float_input("Enter Non-Equal Side's Length : ", b)) continue;
+                std::cout << "Perimeter : " << 2 * a + b << "\n\n"; // Corrected from Area
+            } else if (sch == "3") { // Square / Rhombus
+                 float a;
+                if (!get_float_input("Enter Length of Side [a] : ", a)) continue;
+                std::cout << "Perimeter : " << 4 * a << "\n\n";
+            } else if (sch == "4") { // Rectangle / Parallelogram
+                 float l, b;
+                if (!get_float_input("Enter Length [l] : ", l)) continue;
+                if (!get_float_input("Enter Breadth [b] : ", b)) continue;
+                std::cout << "Perimeter : " << 2 * (l + b) << "\n\n";
+            } else if (sch == "5") { // circle
+                 float r;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                std::cout << "Circumference : " << 2 * M_PI * r << "\n\n";
+            } else {
+                std::cout << "Invalid Option! Exiting Perimeter Calculation ...\n\n";
+            }
         } else if (ch == "16") { // Area [Various Shapes]
-             cout << "Area Calculation [Various Shapes]\n\n";
-             cout << "Select a shape : \n"
-                   << "1. Equilateral Triangle\n"
-                   << "2. Isosceles Triangle\n"
-                   << "3. Square\n"
-                   << "4. Rectangle / Parallelogram\n"
-                   << "5. Rhombus\n"
-                   << "6. Circle\n"
-                   << "7. Semi-circle\n";
-             string sch;
-             cout << "Enter shape choice [ 1 - 7 ] : ";
-             getline(cin, sch);
-             cout << endl; // Python print() after input
+            std::cout << "Area Calculation [Various Shapes]\n"
+                      << "Select a shape : \n" << "1. Equilateral Triangle\n" << "2. Isosceles Triangle\n"
+                      << "3. Square\n" << "4. Rectangle / Parallelogram\n" << "5. Rhombus\n"
+                      << "6. Circle\n" << "7. Semi-circle\n\n";
 
-             if (sch == "1") { // Equilateral Triangle
-                 double a = getDoubleInput("Enter Side Length [a] : "); cout << endl;
-                 if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { double ar = (sqrt(3) / 4.0) * pow(a, 2); cout << "Area : " << ar << "\n\n"; }
-             } else if (sch == "2") { // Isosceles Triangle
-                 double a = getDoubleInput("Enter Equal Side's Length : "); cout << endl;
-                 double b = getDoubleInput("Enter Non-Equal Side's Length : "); cout << endl;
-                 if (a < 0 || b < 0) { cout << "Side lengths cannot be negative.\n\n"; }
-                 // Add a check for valid isosceles triangle side lengths
-                 else if (2 * a <= b) { cout << "Invalid side lengths for an isosceles triangle (2a <= b).\n\n"; }
-                 else {
-                     // Area = (b/4) * sqrt(4a^2 - b^2)
-                     double radicand = 4 * pow(a, 2) - pow(b, 2);
-                     if (radicand < 0 && radicand > -1e-9) { // Handle potential small negative due to float
-                          radicand = 0;
-                     }
-                     if (radicand < 0) { // Still negative means invalid input
-                          cout << "Area : Calculation Error (invalid triangle or floating point issue)\n\n";
-                     } else {
-                          double ar = (b / 4.0) * sqrt(radicand);
-                          cout << "Area : " << ar << "\n\n";
-                     }
+            std::string sch;
+            std::cout << "Enter shape choice [ 1 - 7 ] : ";
+            std::cin >> sch;
+            std::cout << '\n';
+
+            if (sch == "1") { // Equilateral Triangle
+                float a;
+                if (!get_float_input("Enter Side Length [a] : ", a)) continue;
+                float ar = (std::sqrt(3) / 4) * std::pow(a, 2);
+                std::cout << "Area : " << ar << "\n\n";
+            } else if (sch == "2") { // Isosceles Triangle
+                float a, b;
+                if (!get_float_input("Enter Equal Side's Length : ", a)) continue;
+                if (!get_float_input("Enter Non-Equal Side's Length : ", b)) continue;
+                 if (4 * std::pow(a, 2) - std::pow(b, 2) < 0) {
+                    std::cout << "Sides do not form a valid isosceles triangle.\n\n";
+                    continue;
                  }
-             } else if (sch == "3") { // Square
-                 double a = getDoubleInput("Enter Length of Side [a] : "); cout << endl;
-                 if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { double ar = pow(a, 2); cout << "Area : " << ar << "\n\n"; }
-             } else if (sch == "4") { // Rectangle / Parallelogram
-                 double l = getDoubleInput("Enter Length [l] : "); cout << endl;
-                 double b = getDoubleInput("Enter Breadth [b] : "); cout << endl;
-                  if (l < 0 || b < 0) { cout << "Length and Breadth cannot be negative.\n\n"; } else { double ar = l * b; cout << "Area : " << ar << "\n\n"; }
-             } else if (sch == "5") { // Rhombus
-                 double d1 = getDoubleInput("Enter Diagonal 1 [d1] : "); cout << endl;
-                 double d2 = getDoubleInput("Enter Diagonal 2 [d2] : "); cout << endl;
-                 if (d1 < 0 || d2 < 0) { cout << "Diagonals cannot be negative.\n\n"; } else { double area = 0.5 * d1 * d2; cout << "Area of Rhombus : " << area << "\n\n"; }
-             } else if (sch == "6") { // circle
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 if (r < 0) { cout << "Radius cannot be negative.\n\n"; } else { double area = PI * pow(r, 2); cout << "Area : " << area << "\n\n"; }
-             } else if (sch == "7") { // Semi-circle
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                  if (r < 0) { cout << "Radius cannot be negative.\n\n"; } else { double area = 0.5 * PI * pow(r, 2); cout << "Area : " << area << "\n\n"; }
-             }
-             else {
-                 cout << "Invalid Option! Exiting Area Calculation ...\n\n";
-             }
+                float ar = (b / 4.0) * std::sqrt(4 * std::pow(a, 2) - std::pow(b, 2)); // Corrected Area formula
+                std::cout << "Area : " << ar << "\n\n";
+            } else if (sch == "3") { // Square
+                float a;
+                if (!get_float_input("Enter Length of Side [a] : ", a)) continue;
+                float ar = std::pow(a, 2);
+                std::cout << "Area : " << ar << "\n\n";
+            } else if (sch == "4") { // Rectangle / Parallelogram
+                float l, b;
+                if (!get_float_input("Enter Length [l] : ", l)) continue;
+                if (!get_float_input("Enter Breadth [b] : ", b)) continue;
+                float ar = l * b;
+                std::cout << "Area : " << ar << "\n\n";
+            } else if (sch == "5") { // Rhombus
+                float d1, d2;
+                if (!get_float_input("Enter Diagonal 1 [d1] : ", d1)) continue;
+                if (!get_float_input("Enter Diagonal 2 [d2] : ", d2)) continue;
+                float area = 0.5 * d1 * d2;
+                std::cout << "Area of Rhombus : " << area << "\n\n";
+            } else if (sch == "6") { // circle
+                float r;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                float area = M_PI * std::pow(r, 2);
+                std::cout << "Area : " << area << "\n\n";
+            } else if (sch == "7") { // Semi-circle
+                float r;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                float area = 0.5 * M_PI * std::pow(r, 2);
+                std::cout << "Area : " << area << "\n\n";
+            } else {
+                std::cout << "Invalid Option! Exiting Area Calculation ...\n\n";
+            }
         } else if (ch == "17") { // Volume [Various Shapes]
-             cout << "Volume Calculation [Various Shapes]\n\n";
-             cout << "Select a shape : \n"
-                   << "1. Cube\n"
-                   << "2. Cuboid\n"
-                   << "3. Cylinder\n"
-                   << "4. Cone\n"
-                   << "5. Sphere\n";
-             string sch;
-             cout << "Enter shape choice [ 1 - 5 ] : ";
-             getline(cin, sch);
-             cout << endl; // Python print() after input
+            std::cout << "Volume Calculation [Various Shapes]\n"
+                      << "Select a shape : \n" << "1. Cube\n" << "2. Cuboid\n" << "3. Cylinder\n"
+                      << "4. Cone\n" << "5. Sphere\n\n";
 
-             if (sch == "1") { // Cube
-                 double a = getDoubleInput("Enter Length of Side [a] : "); cout << endl;
-                 if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { double vol = pow(a, 3); cout << "Volume : " << vol << "\n\n"; }
-             } else if (sch == "2") { // Cuboid
-                 double l = getDoubleInput("Enter Length [l] : "); cout << endl;
-                 double b = getDoubleInput("Enter Breadth [b] : "); cout << endl;
-                 double h = getDoubleInput("Enter Height [h] : "); cout << endl;
-                  if (l < 0 || b < 0 || h < 0) { cout << "Length, Breadth, and Height cannot be negative.\n\n"; } else { double vol = l * b * h; cout << "Volume : " << vol << "\n\n"; }
-             } else if (sch == "3") { // Cylinder
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 double h = getDoubleInput("Enter the Height [h] : "); cout << endl;
-                  if (r < 0 || h < 0) { cout << "Radius and Height cannot be negative.\n\n"; } else { double vol = PI * pow(r, 2) * h; cout << "Volume : " << vol << "\n\n"; }
-             } else if (sch == "4") { // Cone
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 double h = getDoubleInput("Enter the Height [h] : "); cout << endl;
-                  if (r < 0 || h < 0) { cout << "Radius and Height cannot be negative.\n\n"; } else { double vol = (1.0/3.0) * PI * pow(r, 2) * h; cout << "Volume : " << vol << "\n\n"; }
-             } else if (sch == "5") { // Sphere
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                  if (r < 0) { cout << "Radius cannot be negative.\n\n"; } else { double vol = (4.0/3.0) * PI * pow(r, 3); cout << "Volume : " << vol << "\n\n"; }
-             }
-             else {
-                 cout << "Invalid Option! Exiting Volume Calculation ...\n\n";
-             }
+            std::string sch;
+            std::cout << "Enter shape choice [ 1 - 5 ] : ";
+            std::cin >> sch;
+            std::cout << '\n';
+
+            if (sch == "1") { // Cube
+                float a;
+                if (!get_float_input("Enter Length of Side [a] : ", a)) continue;
+                float vol = std::pow(a, 3);
+                std::cout << "Volume : " << vol << "\n\n";
+            } else if (sch == "2") { // Cuboid
+                 float l, b, h;
+                if (!get_float_input("Enter Length [l] : ", l)) continue;
+                if (!get_float_input("Enter Breadth [b] : ", b)) continue;
+                if (!get_float_input("Enter Height [h] : ", h)) continue;
+                float vol = l * b * h;
+                std::cout << "Volume : " << vol << "\n\n";
+            } else if (sch == "3") { // Cylinder
+                float r, h;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                if (!get_float_input("Enter the Height [h] : ", h)) continue;
+                float vol = M_PI * std::pow(r, 2) * h;
+                std::cout << "Volume : " << vol << "\n\n";
+            } else if (sch == "4") { // Cone
+                float r, h;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                if (!get_float_input("Enter the Height [h] : ", h)) continue;
+                float vol = (1.0/3.0) * M_PI * std::pow(r, 2) * h;
+                std::cout << "Volume : " << vol << "\n\n";
+            } else if (sch == "5") { // Sphere
+                float r;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                float vol = (4.0/3.0) * M_PI * std::pow(r, 3);
+                std::cout << "Volume : " << vol << "\n\n";
+            } else {
+                std::cout << "Invalid Option! Exiting Volume Calculation ...\n\n";
+            }
         } else if (ch == "18") { // Surface Area [Various Shapes]
-             cout << "Surface Area Calculation [Various Shapes]\n\n";
-             cout << "Select a shape : \n"
-                   << "1. Cube\n"
-                   << "2. Cuboid\n"
-                   << "3. Cylinder\n"
-                   << "4. Cone\n"
-                   << "5. Sphere\n";
-             string sch;
-             cout << "Enter shape choice [ 1 - 5 ] : ";
-             getline(cin, sch);
-             cout << endl; // Python print() after input
+             std::cout << "Surface Area Calculation [Various Shapes]\n"
+                       << "Select a shape : \n" << "1. Cube\n" << "2. Cuboid\n" << "3. Cylinder\n"
+                       << "4. Cone\n" << "5. Sphere\n\n";
 
-             if (sch == "1") { // Cube
-                 double a = getDoubleInput("Enter Length of Side [a] : "); cout << endl;
-                  if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { double sa = 6 * pow(a, 2); cout << "Surface Area : " << sa << "\n\n"; }
-             } else if (sch == "2") { // Cuboid
-                 double l = getDoubleInput("Enter Length [l] : "); cout << endl;
-                 double b = getDoubleInput("Enter Breadth [b] : "); cout << endl;
-                 double h = getDoubleInput("Enter Height [h] : "); cout << endl;
-                  if (l < 0 || b < 0 || h < 0) { cout << "Length, Breadth, and Height cannot be negative.\n\n"; } else { double sa = 2 * (l * b + b * h + h * l); cout << "Surface Area : " << sa << "\n\n"; }
-             } else if (sch == "3") { // Cylinder
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 double h = getDoubleInput("Enter the Height [h] : "); cout << endl;
-                  if (r < 0 || h < 0) { cout << "Radius and Height cannot be negative.\n\n"; } else { double sa = 2 * PI * r * (r + h); cout << "Surface Area : " << sa << "\n\n"; }
-             } else if (sch == "4") { // Cone
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 double h = getDoubleInput("Enter the Height [h] : "); cout << endl;
-                  if (r < 0 || h < 0) { cout << "Radius and Height cannot be negative.\n\n"; } else { double sa = PI * r * (r + sqrt(pow(h, 2) + pow(r, 2))); cout << "Surface Area : " << sa << "\n\n"; }
-             } else if (sch == "5") { // Sphere
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                  if (r < 0) { cout << "Radius cannot be negative.\n\n"; } else { double sa = 4 * PI * pow(r, 2); cout << "Surface Area : " << sa << "\n\n"; }
-             }
-             else {
-                 cout << "Invalid Option! Exiting Surface Area Calculation ...\n\n";
-             }
+            std::string sch;
+            std::cout << "Enter shape choice [ 1 - 5 ] : ";
+            std::cin >> sch;
+            std::cout << '\n';
+
+            if (sch == "1") { // Cube
+                float a;
+                if (!get_float_input("Enter Length of Side [a] : ", a)) continue;
+                float sa = 6 * std::pow(a, 2);
+                std::cout << "Surface Area : " << sa << "\n\n";
+            } else if (sch == "2") { // Cuboid
+                float l, b, h;
+                if (!get_float_input("Enter Length [l] : ", l)) continue;
+                if (!get_float_input("Enter Breadth [b] : ", b)) continue;
+                if (!get_float_input("Enter Height [h] : ", h)) continue;
+                float sa = 2 * (l * b + b * h + h * l);
+                std::cout << "Surface Area : " << sa << "\n\n";
+            } else if (sch == "3") { // Cylinder
+                 float r, h;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                if (!get_float_input("Enter the Height [h] : ", h)) continue;
+                float sa = 2 * M_PI * r * (r + h);
+                std::cout << "Surface Area : " << sa << "\n\n";
+            } else if (sch == "4") { // Cone
+                float r, h;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                if (!get_float_input("Enter the Height [h] : ", h)) continue;
+                float sa = M_PI * r * (r + std::sqrt(std::pow(h, 2) + std::pow(r, 2)));
+                std::cout << "Surface Area : " << sa << "\n\n";
+            } else if (sch == "5") { // Sphere
+                float r;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                float sa = 4 * M_PI * std::pow(r, 2);
+                std::cout << "Surface Area : " << sa << "\n\n";
+            } else {
+                std::cout << "Invalid Option! Exiting Surface Area Calculation ...\n\n";
+            }
         } else if (ch == "19") { // Curved Surface Area [Various Shapes]
-             cout << "Curved Surface Area Calculation [Various Shapes]\n\n";
-             cout << "Select a shape : \n"
-                   << "1. Cylinder\n"
-                   << "2. Cone\n"
-                   << "3. Sphere\n";
-             string sch;
-             cout << "Enter shape choice [ 1 - 3 ] : ";
-             getline(cin, sch);
-             cout << endl; // Python print() after input
+            std::cout << "Curved Surface Area Calculation [Various Shapes]\n"
+                      << "Select a shape : \n" << "1. Cylinder\n" << "2. Cone\n" << "3. Sphere\n\n";
 
-             if (sch == "1") { // Cylinder
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 double h = getDoubleInput("Enter the Height [h] : "); cout << endl;
-                 if (r < 0 || h < 0) { cout << "Radius and Height cannot be negative.\n\n"; } else { double csa = 2 * PI * r * h; cout << "Curved Surface Area : " << csa << "\n\n"; }
-             } else if (sch == "2") { // Cone
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 double h = getDoubleInput("Enter the Height [h] : "); cout << endl;
-                  if (r < 0 || h < 0) { cout << "Radius and Height cannot be negative.\n\n"; } else { double csa = PI * r * sqrt(pow(h, 2) + pow(r, 2)); cout << "Curved Surface Area : " << csa << "\n\n"; }
-             } else if (sch == "3") { // Sphere
-                 double r = getDoubleInput("Enter the Radius [r] : "); cout << endl;
-                 if (r < 0) { cout << "Radius cannot be negative.\n\n"; } else { double csa = 4 * PI * pow(r, 2); // Note: CSA of Sphere is the same as SA
-                 cout << "Curved Surface Area : " << csa << "\n\n"; }
-             }
-             else {
-                 cout << "Invalid Option! Exiting Curved Surface Area Calculation ...\n\n";
-             }
+            std::string sch;
+            std::cout << "Enter shape choice [ 1 - 3 ] : ";
+            std::cin >> sch;
+            std::cout << '\n';
+
+            if (sch == "1") { // Cylinder
+                float r, h;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                if (!get_float_input("Enter the Height [h] : ", h)) continue;
+                float csa = 2 * M_PI * r * h;
+                std::cout << "Curved Surface Area : " << csa << "\n\n";
+            } else if (sch == "2") { // Cone
+                float r, h;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                if (!get_float_input("Enter the Height [h] : ", h)) continue;
+                float csa = M_PI * r * std::sqrt(std::pow(h, 2) + std::pow(r, 2));
+                std::cout << "Curved Surface Area : " << csa << "\n\n";
+            } else if (sch == "3") { // Sphere
+                float r;
+                if (!get_float_input("Enter the Radius [r] : ", r)) continue;
+                float csa = 4 * M_PI * std::pow(r, 2); // Sphere's CSA is the same as its total surface area
+                std::cout << "Curved Surface Area : " << csa << "\n\n";
+            } else {
+                std::cout << "Invalid Option! Exiting Curved Surface Area Calculation ...\n\n";
+            }
         } else if (ch == "20") { // Diagonal Calculation [Various Shapes]
-             cout << "Diagonal Calculation [Various Shapes]\n\n";
-             cout << "Select a shape : \n"
-                   << "1. Square\n"
-                   << "2. Rectangle\n"
-                   << "3. Cube\n"
-                   << "4. Cuboid\n";
-             string sch;
-             cout << "Enter shape choice [ 1 - 4 ] : "; // Corrected choice range from Python
-             getline(cin, sch);
-             cout << endl; // Python print() after input
+            std::cout << "Diagonal Calculation [Various Shapes]\n"
+                      << "Select a shape : \n" << "1. Square\n" << "2. Rectangle\n"
+                      << "3. Cube\n" << "4. Cuboid\n\n";
 
-             if (sch == "1") { // Square
-                 double a = getDoubleInput("Enter Length of Side [a] : "); cout << endl;
-                 if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { double d = sqrt(2.0) * a; cout << "Diagonal : " << d << "\n\n"; }
-             } else if (sch == "2") { // Rectangle
-                 double l = getDoubleInput("Enter Length [l] : "); cout << endl;
-                 double b = getDoubleInput("Enter Breadth [b] : "); cout << endl;
-                  if (l < 0 || b < 0) { cout << "Length and Breadth cannot be negative.\n\n"; } else { double d = sqrt(pow(l, 2) + pow(b, 2)); cout << "Diagonal : " << d << "\n\n"; }
-             } else if (sch == "3") { // Cube
-                 double a = getDoubleInput("Enter Length of Side [a] : "); cout << endl;
-                  if (a < 0) { cout << "Side length cannot be negative.\n\n"; } else { double d = sqrt(3.0) * a; cout << "Diagonal : " << d << "\n\n"; }
-             } else if (sch == "4") { // Cuboid
-                 double l = getDoubleInput("Enter Length [l] : "); cout << endl;
-                 double b = getDoubleInput("Enter Breadth [b] : "); cout << endl;
-                 double h = getDoubleInput("Enter Height [h] : "); cout << endl;
-                  if (l < 0 || b < 0 || h < 0) { cout << "Length, Breadth, and Height cannot be negative.\n\n"; } else { double d = sqrt(pow(l, 2) + pow(b, 2) + pow(h, 2)); cout << "Diagonal : " << d << "\n\n"; }
-             }
-             else {
-                 cout << "Invalid Option! Exiting Diagonal Calculation ...\n\n";
-             }
+            std::string sch;
+            std::cout << "Enter shape choice [ 1 - 4 ] : ";
+            std::cin >> sch;
+            std::cout << '\n';
+
+            if (sch == "1") { // Square
+                float a;
+                if (!get_float_input("Enter Length of Side [a] : ", a)) continue;
+                float d = std::sqrt(2) * a;
+                std::cout << "Diagonal : " << d << "\n\n";
+            } else if (sch == "2") { // Rectangle
+                float l, b;
+                if (!get_float_input("Enter Length [l] : ", l)) continue;
+                if (!get_float_input("Enter Breadth [b] : ", b)) continue;
+                float d = std::sqrt(std::pow(l, 2) + std::pow(b, 2));
+                std::cout << "Diagonal : " << d << "\n\n";
+            } else if (sch == "3") { // Cube
+                float a;
+                if (!get_float_input("Enter Length of Side [a] : ", a)) continue;
+                float d = std::sqrt(3) * a;
+                std::cout << "Diagonal : " << d << "\n\n";
+            } else if (sch == "4") { // Cuboid
+                float l, b, h;
+                if (!get_float_input("Enter Length [l] : ", l)) continue;
+                if (!get_float_input("Enter Breadth [b] : ", b)) continue;
+                if (!get_float_input("Enter Height [h] : ", h)) continue;
+                float d = std::sqrt(std::pow(l, 2) + std::pow(b, 2) + std::pow(h, 2));
+                std::cout << "Diagonal : " << d << "\n\n";
+            } else {
+                std::cout << "Invalid Option! Exiting Diagonal Calculation ...\n\n";
+            }
         } else if (ch == "21") { // Factorial Calculation
-             int x = getIntInput("Enter a Number : "); cout << endl;
-             if (x < 0) {
-                 cout << "Factorial Not Defined for Negative Numbers!\n\n";
-             } else if (x == 0 || x == 1) {
-                 cout << "Factorial of " << x << " is 1\n\n";
-             } else {
-                 // Use unsigned long long for potentially large factorials
-                 unsigned long long fact = 1;
-                 for (int i = 2; i <= x; ++i) {
-                     // Add a check for overflow if needed for very large numbers
-                     // This simple conversion doesn't include full overflow handling
-                     fact *= i;
-                 }
-                 cout << "Factorial of " << x << " is " << fact << "\n\n";
-             }
+            int x;
+            if (!get_int_input("Enter a Number : ", x)) continue;
+
+            if (x < 0) {
+                std::cout << "\nFactorial Not Defined for Negative Numbers!\n\n";
+            } else if (x == 0 || x == 1) {
+                std::cout << "\nFactorial of " << x << " is 1\n\n";
+            } else {
+                long long fact = 1; // Use long long for larger factorials
+                for (int i = 2; i <= x; ++i) {
+                    fact *= i;
+                }
+                std::cout << "\nFactorial of " << x << " is " << fact << "\n\n";
+            }
         } else if (ch == "22") { // Exit Program
-             cout << "Exiting PyCalc-CE...\n";
-             exit(0);
-        } else { // Default Case (Invalid Choice)
-             cout << "Please enter a Valid Input! Retry Again....\n\n";
-             continue;
+            break; // Exit the while loop
+        } else { // Default Case
+            std::cout << "Please enter a Valid Input! Restarting PyCalc-CE ...\n\n";
+            continue;
         }
 
-        // Next_Calc Loop - Only ask if the user didn't choose to exit (choice 22)
-        if (ch != "22") {
-             string next_calc;
-             cout << "Do you Want to Perform Another Calculation? [y/n]: ";
-             getline(cin, next_calc);
-             cout << endl; // Python print() after input
+        std::string next_calc;
+        std::cout << "Do you Want to Perform Another Calculation? [y/n]: "; // Next_Calc Loop
+        std::cin >> next_calc;
+        std::cout << '\n';
 
-             // Convert input to lowercase for case-insensitive comparison
-             transform(next_calc.begin(), next_calc.end(), next_calc.begin(),
-                            ::tolower);
-
-             if (next_calc == "n" || next_calc == "no") {
-                 cout << "Exiting PyCalc-CE...\n";
-                 break; // Exit the main while(true) loop
-             } else if (next_calc != "y" && next_calc != "yes") {
-                 // If input is neither 'y', 'yes', 'n', nor 'no', print a message and continue
-                 cout << "Invalid input. Continuing...\n\n";
-             }
-             // If input was 'y' or 'yes', the loop continues naturally
+        if (next_calc == "n" || next_calc == "no") {
+            break; // Exit the while loop
+        } else if (next_calc == "y" || next_calc == "yes") {
+             // continue (implicit)
         }
-    }    
-    return 0;
+        else {
+             std::cout << "Please enter a Valid Input! Restarting PyCalc-CE ...\n\n";
+        }
+    }
+
+    return 0; // Indicate successful execution
 }
