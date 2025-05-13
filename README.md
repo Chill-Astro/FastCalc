@@ -1,6 +1,6 @@
-PyCalc-CE : A Simple and Lightweight Calculator. Now in C++!
+PyCalc C++ Edition [ CE ] is a spin of Pycalc in C++!
 
-CE - C++ Edition
+NOTE : PyCalc - C++ Edition Has been replaced with [PyCalc - C# Edition](https://github.com/Chill-Astro/PyCalc-CE)
 
 Features Include :
 
