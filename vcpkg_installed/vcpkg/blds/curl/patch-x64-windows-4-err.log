@@ -1,0 +1,3 @@
+Checking patch CMake/curl-config.cmake.in...
+Hunk #1 succeeded at 35 (offset -11 lines).
+Applied patch CMake/curl-config.cmake.in cleanly.
