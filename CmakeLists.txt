@@ -6,8 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add icon resource for Windows
 if(WIN32)
-     Uncomment the next line if you add an icon resource file (e.g., appicon.rc)
-     set(APP_ICON_RESOURCE_WINDOWS appicon.rc)
+     set(APP_ICON_RESOURCE_WINDOWS icon.rc)
 endif()
 
 add_executable(FastCalc FastCalc.cpp
