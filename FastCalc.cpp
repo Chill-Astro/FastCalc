@@ -12,14 +12,14 @@
 #include <unistd.h>
 #endif
 
-const std::string CURRENT_VERSION = "1.7"; // MacOS Release
+const std::string CURRENT_VERSION = "1.1"; // MacOS Release
 
 void clearInput() {        
 }
 
 void printVersion() {
     std::cout << "FastCalc : A Simple and Lightweight Calculator. Made in C++!\n"
-              << "Version : " << CURRENT_VERSION << "\n";
+              << "Version : " << CURRENT_VERSION << "\n\n";
 }
 
 void perform_binary_operation(const std::string& op, double (*func)(double, double)) {

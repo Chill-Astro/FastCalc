@@ -1,1 +1,8 @@
 .vscode/
+FastCalc.exe
+FastCalc.obj
+FastCalc.pdb
+vc140.pdb
+FastCalc.ilk
+build/
+
