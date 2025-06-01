@@ -4,4 +4,12 @@ project(FastCalc)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(FastCalc FastCalc.cpp)
+# Add icon resource for Windows
+if(WIN32)
+     Uncomment the next line if you add an icon resource file (e.g., appicon.rc)
+     set(APP_ICON_RESOURCE_WINDOWS appicon.rc)
+endif()
+
+add_executable(FastCalc FastCalc.cpp
+     ${APP_ICON_RESOURCE_WINDOWS} 
+)
