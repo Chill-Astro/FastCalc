@@ -1,8 +1,12 @@
-PyCalc C++ Edition [ CE ] is a spin of Pycalc in C++!
+<p align="center">
+  <img src="https://github.com/Chill-Astro/FastCalc/blob/main/FastCalc.ico" width="300px" alt="Calculator Logo">
+</p>
 
-NOTE : PyCalc - C++ Edition Has been replaced with [PyCalc - C# Edition](https://github.com/Chill-Astro/PyCalc-CE)
+FastCalc is a High Speed Version of [PyCalc](https://github.com/Chill-Astro/PyCalc) written fully in C++. Available on Windows and Linux! 
 
-Features Include :
+---
+
+## Features Include :
 
 - Dozens of Calculation Options ✅
 - Extemely Lightweight [It's a Terminal-based App]. ✅
@@ -11,12 +15,37 @@ Features Include :
 - High Precision for decimals. ✅
 - High Speed thanks to C++. ✅
 
-Installation and Requirements :
+---
+
+## Install FastCalc from Winget [ Later ] : 
+
+    winget install PyCalc-CE
+
+---
+
+## To Run on Linux : 
+
+    chmod +x /<path>/FastCalc
+
+    .//<path>/FastCalc
+
+
+Replace <path> with the actual directory.
+
+Note : You may need to run as Superuser using sudo!
+
+---
+
+## Preview :
+
+![image](https://github.com/user-attachments/assets/6409bb49-0713-4f63-9f19-50bc50af33d7)
+
+---
+
+## Installation and Requirements :
 
 - Any system with MSVC / GCC / Clang installed [ For building ].
 - Build the file in any IDE / Code Editior or in Terminal.
 - No installation needed if using PyCalc-CE.exe on Windows Systems or PyCalc-CE for Linux Systems!
 
-![image](https://github.com/user-attachments/assets/b372982d-1035-4079-8e4b-94c88380029d)
-
-Simple! Powerful! Lightweight!
+---
