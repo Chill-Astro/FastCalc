@@ -1,3 +1,11 @@
 To export in MSVC on Windows :
 
-g++ PyCalc-CE.cpp -o PyCalc-CE -lcurl -lm
+cl FastCalc.cpp Icon.res
+
+Without Icon :
+
+cl FastCalc.cpp
+
+To export with GCC on Linux :
+
+g++ FastCalc -o FastCalc
