@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/Chill-Astro/FastCalc/blob/main/FastCalc.ico" width="300px" alt="Calculator Logo">
+  <img src="https://github.com/Chill-Astro/FastCalc/blob/main/Banner.png" width="540px" alt="Calculator Logo">
 </p>
 
 FastCalc is a High Speed Version of [PyCalc](https://github.com/Chill-Astro/PyCalc) written fully in C++. Available on Windows and Linux! 
