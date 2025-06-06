@@ -20,7 +20,7 @@ FastCalc is a High Speed Version of [PyCalc](https://github.com/Chill-Astro/PyCa
 
 ## Install FastCalc from Winget [ Later ] : 
 
-    winget install PyCalc-CE
+    winget install FastCalc
 
 ---
 
@@ -51,7 +51,7 @@ Note : You may need to run as Superuser using sudo!
 
 ---
 
-## Note from developer :
+## Note from Developer :
 
 Appreciate my effort? Why not leave a Star ⭐ ! Also if forked, please credit me for my effort and thanks if you do! :)
 
