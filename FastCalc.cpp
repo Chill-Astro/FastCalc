@@ -12,7 +12,7 @@
 #include <unistd.h>
 #endif
 
-const std::string CURRENT_VERSION = "1.1"; // MacOS Release
+const std::string CURRENT_VERSION = "1.1"; // FastCalc Update 
 
 void clearInput() {        
 }
@@ -203,9 +203,6 @@ void right_triangle_check() {
     else
         std::cout << "Not a Right Triangle.\n\n";
 }
-
-// --- Perimeter, Area, Volume, Surface Area, Curved Surface Area, Diagonal, Factorial ---
-// For brevity, only a few are shown. You can expand similarly for all cases.
 
 void perimeter_various() {
     std::cout << "Perimeter Calculation [Various Shapes]\n"
