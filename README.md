@@ -47,7 +47,7 @@ Note : You may need to run as Superuser using sudo!
 
 - Any system with MSVC / GCC / Clang installed [ For building ].
 - Build the file in any IDE / Code Editior or in Terminal.
-- No installation needed if using PyCalc-CE.exe on Windows Systems or PyCalc-CE for Linux Systems!
+- No installation needed if using FastCalc.exe on Windows Systems or FastCalc for Linux Systems!
 
 ---
 
