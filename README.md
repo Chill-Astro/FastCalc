@@ -18,7 +18,7 @@ FastCalc is a High Speed Version of [PyCalc](https://github.com/Chill-Astro/PyCa
 
 ---
 
-## Install FastCalc from Winget [ Later ] : 
+## Install FastCalc from Winget [ Coming Soon! ] : 
 
     winget install FastCalc
 
