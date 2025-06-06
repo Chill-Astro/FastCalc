@@ -50,3 +50,9 @@ Note : You may need to run as Superuser using sudo!
 - No installation needed if using PyCalc-CE.exe on Windows Systems or PyCalc-CE for Linux Systems!
 
 ---
+
+## Note from developer :
+
+Appreciate my effort? Why not leave a Star ⭐ ! Also if forked, please credit me for my effort and thanks if you do! :)
+
+---
